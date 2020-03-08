@@ -4,11 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -32,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -43,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
         mCameraView.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                if(txtHasFocus){
+                    //TODO: add dialog to check if user wants to return to detection
+                }
                 txtHasFocus = !txtHasFocus;
             }
         });
@@ -53,8 +61,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
+        //start detecting
         startCameraSource();
     }
 
@@ -76,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                     .setRequestedFps(2.0f)
                     .build();
 
-            /**
+            /*
              * Add call back to SurfaceView and check if camera permission is granted.
              * If permission is granted we can start our cameraSource and pass it to surfaceView
              */

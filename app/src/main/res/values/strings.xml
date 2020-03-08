@@ -2,6 +2,7 @@
     <string name="app_name">OCR_1</string>
 
     <string name="title_activity_fullscreen">FullscreenActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="accept">Yep</string>
+    <string name="cancel">Nope</string>
+    <string name="returnToDetection">Do you want to return to detection?</string>
 </resources>
