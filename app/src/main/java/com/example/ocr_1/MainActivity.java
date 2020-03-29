@@ -34,6 +34,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.io.IOException;
 import java.text.DecimalFormat;
 
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "OCR_MainActivity";
