@@ -1,7 +1,10 @@
 package com.example.ocr_1;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -10,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.transition.TransitionManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
@@ -17,14 +21,18 @@ import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +41,17 @@ public class MainActivity extends AppCompatActivity {
     CameraSource mCameraSource;
     SurfaceView mCameraView;
     TextView mTextView;
+    FloatingActionButton mFAB;
+    ConstraintLayout mConstraintLayout;
+    SeekBar mSeekBar;
+
     boolean txtHasFocus = false;
+    long updateDelay = 0;
+    long updateAfter = System.currentTimeMillis();
+    boolean update = true;
+    DecimalFormat df = new DecimalFormat("#.##");
+
+    int menuHeight = 0;
 
 
     @Override
@@ -41,8 +59,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final Context context = this;
+
         mCameraView = findViewById(R.id.surfaceView2);
         mTextView = findViewById(R.id.textView3);
+        mFAB = findViewById(R.id.floatingActionButton);
+        mConstraintLayout = findViewById(R.id.constraintLayout);
+        mSeekBar = findViewById(R.id.seekBar2);
 
         //pause/play detection when user taps anywhere on screen
         mCameraView.setOnClickListener(new View.OnClickListener(){
@@ -60,12 +83,55 @@ public class MainActivity extends AppCompatActivity {
                 txtHasFocus = !txtHasFocus;
             }
         });
+        mFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //https://developer.android.com/reference/android/support/constraint/ConstraintSet#setMargin(int,%20int,%20int)
+
+                //toggle menuHeight
+                if(menuHeight == 0){
+                    //not visible, so show
+                    menuHeight = 500;
+                }else{
+                    menuHeight = 0;
+                }
+
+                ConstraintSet constraintSet1 = new ConstraintSet();
+                constraintSet1.clone(context, R.layout.activity_main);
+                ConstraintSet constraintSet2 = new ConstraintSet();
+                constraintSet2.clone(context, R.layout.activity_main);
+                constraintSet2.setMargin(R.id.surfaceView2, ConstraintSet.BOTTOM, menuHeight);
+
+                TransitionManager.beginDelayedTransition(mConstraintLayout);
+                constraintSet2.applyTo(mConstraintLayout);
+
+
+            }
+        });
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                updateDelay = mSeekBar.getProgress();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                Toast.makeText(getApplicationContext(), String.valueOf("Update Delay: " + df.format((double) seekBar.getProgress()/1000)) + "s",Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         //start detecting
         startCameraSource();
     }
 
 
+    //https://codelabs.developers.google.com/codelabs/mobile-vision-ocr/#0
     private void startCameraSource() {
 
         //Create the TextRecognizer
@@ -144,8 +210,11 @@ public class MainActivity extends AppCompatActivity {
                                     stringBuilder.append(item.getValue());
                                     stringBuilder.append("\n");
                                 }
-                                if(!txtHasFocus){
+                                if(!txtHasFocus && System.currentTimeMillis() > updateAfter){
                                     mTextView.setText(stringBuilder.toString());
+
+                                    //update updateAfter
+                                    updateAfter = System.currentTimeMillis() + updateDelay;
                                 }
                             }
                         });
@@ -154,4 +223,18 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+    //function to adjust rate of text update
+    private int updateRate(int interval, TextView mTextView){
+
+        //milliseconds to wait before updating
+        int rateAdJust = 0;
+
+        return rateAdJust;
+    };
 }
+
+////function to adjust rate of text update
+//private class adjustRate(int interval, TextView mTextView){
+//
+//}
